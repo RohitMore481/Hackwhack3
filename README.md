@@ -119,10 +119,7 @@ smart-link-shield/
 │
 ├── manifest.json
 ├── content.js
-├── page-check.js
-├── icon16.png
-├── icon48.png
-└── icon128.png
+└── page-check.js
 
 
 ---
