@@ -5,6 +5,7 @@
 if (!window.__SMART_LINK_SHIELD__) {
 
     window.__SMART_LINK_SHIELD__ = true;
+    let SMART_SHIELD_THEME = "dark"; // default
 
     let consoleResults = [];
 
@@ -148,7 +149,7 @@ if (!window.__SMART_LINK_SHIELD__) {
 
     // ================== SHADOW MODAL ==================
     function createShadowModal(title, bodyHTML) {
-    
+
         const old = document.getElementById("shield-root");
         if (old) old.remove();
     
@@ -166,25 +167,33 @@ if (!window.__SMART_LINK_SHIELD__) {
     
         const shadow = host.attachShadow({ mode: "open" });
     
+        const isDark = SMART_SHIELD_THEME === "dark";
+    
+        const bg = isDark ? "#1f1f1f" : "#ffffff";
+        const headerBg = isDark ? "#2c2c2c" : "#f2f2f2";
+        const textColor = isDark ? "#ffffff" : "#111111";
+        const subText = isDark ? "#cccccc" : "#333333";
+        const buttonBg = isDark ? "#444" : "#e0e0e0";
+    
         shadow.innerHTML = `
             <style>
                 :host {
                     font-family: Arial, sans-serif;
                     font-size: 14px;
                     line-height: 1.6;
-                    color: white;
+                    color: ${textColor};
                 }
     
                 .modal {
                     width: 520px;
-                    background: #1f1f1f;
+                    background: ${bg};
                     border-radius: 12px;
-                    box-shadow: 0 0 30px rgba(0,0,0,0.7);
+                    box-shadow: 0 0 30px rgba(0,0,0,0.5);
                 }
     
                 .header {
                     padding: 14px;
-                    background: #2c2c2c;
+                    background: ${headerBg};
                     border-radius: 12px 12px 0 0;
                     display: flex;
                     justify-content: space-between;
@@ -196,11 +205,11 @@ if (!window.__SMART_LINK_SHIELD__) {
                     padding: 20px;
                     max-height: 450px;
                     overflow-y: auto;
+                    color: ${subText};
                 }
     
                 h3 {
-                    margin: 16px 0 6px 0;
-                    font-weight: bold;
+                    margin: 16px 0 6px;
                 }
     
                 p {
@@ -212,14 +221,19 @@ if (!window.__SMART_LINK_SHIELD__) {
                     border-radius: 6px;
                     border: none;
                     cursor: pointer;
-                    background: #444;
-                    color: white;
+                    background: ${buttonBg};
+                    color: ${textColor};
                     margin-left: 8px;
+                }
+    
+                .theme-toggle {
+                    cursor: pointer;
+                    font-size: 16px;
                 }
     
                 .bar {
                     height: 18px;
-                    background: #333;
+                    background: ${isDark ? "#333" : "#ddd"};
                     border-radius: 8px;
                     margin: 12px 0;
                     overflow: hidden;
@@ -232,8 +246,13 @@ if (!window.__SMART_LINK_SHIELD__) {
     
             <div class="modal">
                 <div class="header">
-                    ${title}
-                    <button id="shield-close">✖</button>
+                    <span>${title}</span>
+                    <div>
+                        <span id="theme-toggle" class="theme-toggle">
+                            ${isDark ? "🌙" : "☀️"}
+                        </span>
+                        <button id="shield-close">✖</button>
+                    </div>
                 </div>
                 <div class="body">
                     ${bodyHTML}
@@ -242,6 +261,11 @@ if (!window.__SMART_LINK_SHIELD__) {
         `;
     
         shadow.getElementById("shield-close").onclick = () => host.remove();
+    
+        shadow.getElementById("theme-toggle").onclick = () => {
+            SMART_SHIELD_THEME = SMART_SHIELD_THEME === "dark" ? "light" : "dark";
+            createShadowModal(title, bodyHTML);
+        };
     }
     
     // ================== CLICK INTERCEPT ==================
