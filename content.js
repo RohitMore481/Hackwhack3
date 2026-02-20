@@ -145,6 +145,47 @@ if (!window.__SMART_LINK_SHIELD__) {
         return findings;
     }
 
+    // ================== XSS / DOM INJECTION DETECTOR ==================
+    function analyzeXSSRisk() {
+
+        let findings = [];
+
+        // Check inline script tags
+        const inlineScripts = document.querySelectorAll("script:not([src])");
+        if (inlineScripts.length > 0)
+            findings.push(`${inlineScripts.length} inline <script> tag(s) detected.`);
+
+        // Check javascript: URLs
+        const jsLinks = [...document.querySelectorAll("a[href^='javascript:']")];
+        if (jsLinks.length > 0)
+            findings.push(`${jsLinks.length} javascript: URL(s) detected.`);
+
+        // Check inline event handlers
+        const allElements = document.querySelectorAll("*");
+        let eventHandlerCount = 0;
+
+        allElements.forEach(el => {
+            for (let attr of el.attributes) {
+                if (attr.name.startsWith("on")) {
+                    eventHandlerCount++;
+                }
+            }
+        });
+
+        if (eventHandlerCount > 0)
+            findings.push(`${eventHandlerCount} inline event handler(s) detected.`);
+
+        // Suspicious iframes
+        const iframes = [...document.querySelectorAll("iframe")];
+        iframes.forEach(frame => {
+            if (!frame.src.startsWith("https://")) {
+                findings.push("Iframe with non-HTTPS source detected.");
+            }
+        });
+
+        return findings;
+    }
+
     // ================== SHADOW MODAL ==================
     function createShadowModal(title, bodyHTML) {
 
@@ -426,6 +467,19 @@ if (!window.__SMART_LINK_SHIELD__) {
             body += `<p style="color:lightgreen;">No console tampering detected.</p>`;
         } else {
             consoleResults.forEach(f => {
+                body += `<p style="color:#ff6b6b;">• ${f}</p>`;
+            });
+        }
+
+        // ================= XSS Detection Section =================
+        body += `<h3>DOM / XSS Risk Analysis</h3>`;
+
+        const xssFindings = analyzeXSSRisk();
+
+        if (xssFindings.length === 0) {
+            body += `<p style="color:lightgreen;">No obvious XSS indicators detected.</p>`;
+        } else {
+            xssFindings.forEach(f => {
                 body += `<p style="color:#ff6b6b;">• ${f}</p>`;
             });
         }
