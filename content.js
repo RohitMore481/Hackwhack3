@@ -1,11 +1,9 @@
-// ==========================================
-// SMART LINK SHIELD - FINAL COMPLETE BUILD
-// ==========================================
+
 
 if (!window.__SMART_LINK_SHIELD__) {
 
     window.__SMART_LINK_SHIELD__ = true;
-    let SMART_SHIELD_THEME = "dark"; // default
+    let SMART_SHIELD_THEME = "dark";
 
     let consoleResults = [];
 
