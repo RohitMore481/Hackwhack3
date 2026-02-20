@@ -449,30 +449,4 @@ if (!window.__SMART_LINK_SHIELD__) {
     
         const shadow = host.attachShadow({ mode: "open" });
     
-        shadow.innerHTML = `
-            <style>
-                .floating {
-                    width: 60px;
-                    height: 60px;
-                    background: #1e88e5;
-                    color: white;
-                    border-radius: 50%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    font-size: 28px;
-                    cursor: pointer;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-                }
-            </style>
-            <div class="floating">🛡</div>
-        `;
-    
-        shadow.querySelector(".floating").onclick = runRuntimeScan;
-    }
-    
-    window.addEventListener("load", ()=>{
-        setTimeout(injectFloatingButton, 800);
-    });
-    
-    }
+        
