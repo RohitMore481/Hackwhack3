@@ -1,7 +1,7 @@
 # Hackwack3
-# 🛡 Smart Link Shield
+# 🛡 LinkShield
 
-Smart Link Shield is a real-time browser security extension that acts as a protective barrier between users and potentially malicious links.
+ LinkShield is a real-time browser security extension that acts as a protective barrier between users and potentially malicious links.
 
 It combines lightweight machine learning, heuristic analysis, runtime monitoring, and console integrity checks to enhance browsing security.
 
