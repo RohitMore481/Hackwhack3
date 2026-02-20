@@ -5,6 +5,18 @@
 if (!window.__SMART_LINK_SHIELD__) {
 
     window.__SMART_LINK_SHIELD__ = true;
+
+    let consoleResults = [];
+
+    window.addEventListener("message", function(event) {
+
+        if (event.source !== window) return;
+
+        if (event.data && event.data.type === "SMART_SHIELD_CONSOLE_RESULT") {
+            consoleResults = event.data.findings;
+        }
+
+    });
     
     // ================== UTIL ==================
     function sigmoid(z) {
@@ -22,6 +34,17 @@ if (!window.__SMART_LINK_SHIELD__) {
         return entropy;
     }
     
+    // ================== PAGE CONTEXT CONSOLE CHECK ==================
+    function injectConsoleCheckScript() {
+
+        const script = document.createElement("script");
+        script.src = chrome.runtime.getURL("page-check.js");
+        script.onload = function() {
+            this.remove();
+        };
+    
+        (document.head || document.documentElement).appendChild(script);
+    }
     // ================== FEATURE EXTRACTION ==================
     function extractFeatures(url) {
         const urlObj = new URL(url);
@@ -83,6 +106,46 @@ if (!window.__SMART_LINK_SHIELD__) {
         return { risks, safety };
     }
     
+    // ================== CONSOLE INTEGRITY MONITOR ==================
+    function analyzeConsoleIntegrity() {
+
+        let findings = [];
+
+        function isNative(fn) {
+            return typeof fn === "function" &&
+                fn.toString().includes("[native code]");
+        }
+
+        if (!isNative(window.eval))
+            findings.push("eval() function has been modified.");
+
+        if (!isNative(window.Function))
+            findings.push("Function constructor has been modified.");
+
+        if (!isNative(window.setTimeout))
+            findings.push("setTimeout() has been modified.");
+
+        if (!isNative(console.log))
+            findings.push("console.log() appears to be hooked.");
+
+        if (!isNative(console.warn))
+            findings.push("console.warn() appears to be hooked.");
+
+        if (!isNative(console.error))
+            findings.push("console.error() appears to be hooked.");
+
+        // Suspicious automation globals
+        const suspiciousGlobals = ["_phantom","__webdriver","callPhantom","selenium"];
+
+        suspiciousGlobals.forEach(name => {
+            if (window[name] !== undefined) {
+                findings.push(`Suspicious global detected: ${name}`);
+            }
+        });
+
+        return findings;
+    }
+
     // ================== SHADOW MODAL ==================
     function createShadowModal(title, bodyHTML) {
     
@@ -327,6 +390,23 @@ if (!window.__SMART_LINK_SHIELD__) {
     
             body += `<p>${p.name}: ${label}</p>`;
         });
+
+        // ================= Console Integrity Section =================
+        // ================= Console Integrity Section =================
+        body += `<h3>Console Integrity Check</h3>`;
+
+        injectConsoleCheckScript();
+
+        // wait briefly for page response
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (consoleResults.length === 0) {
+            body += `<p style="color:lightgreen;">No console tampering detected.</p>`;
+        } else {
+            consoleResults.forEach(f => {
+                body += `<p style="color:#ff6b6b;">• ${f}</p>`;
+            });
+        }
     
         createShadowModal("🛡 Runtime Page Security Report", body);
     }
